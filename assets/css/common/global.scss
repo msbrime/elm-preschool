@@ -1,0 +1,255 @@
+@font-face {
+    font-family: schoolBell;
+    src: url(../fonts/Schoolbell.ttf);
+    font-style : normal;
+    font-weight : 100;
+}
+
+body{
+
+  font-size:2em;
+   color : $text;
+   font-family: 'Mali', cursive;
+   background-color: #f9f9f9;
+   margin: 0;
+
+   @include breakpoint(medium) {
+         font-size:5em;
+    }
+}
+
+ul{
+    padding: 0;
+    list-style: none;
+}
+
+.app-container{
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.text-center{
+    text-align: center;
+}
+
+
+button{
+    border:2px solid #f6903d;
+    background-color:#e1f5c4;
+    color: $text;
+    box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.2);
+    font-family:inherit;
+    font-size:1.2rem;
+    height: 60px;
+
+    &.circular{
+        padding:5px;
+        width: 50px;
+        height:50px;
+        border-radius:100%;
+        outline:none;
+
+        @include breakpoint(medium) {
+            padding:10px;
+            width: 80px;
+            height:80px;
+        }
+    }
+
+    &:hover,&:focus{
+        background-color:#f6903d;
+    }
+
+    @include breakpoint(medium) {
+        font-size:1.5rem;
+    }
+}
+
+.welcome{
+    margin-top:50px;
+    text-align:center;
+    height: 100vh;
+
+    &-message{
+        font-size: $question-text-size + 1;
+    }
+
+    button{
+        border-radius:10px;
+        -webkit-border-radius:10px;
+        -moz-border-radius:10px;
+        -ms-border-radius:10px;
+        -o-border-radius:10px;
+}
+
+    @include breakpoint(medium) {
+        margin-top:100px;
+    }
+}
+
+.score{
+
+    width: 400px;
+    display: grid;
+    grid-template: 70px / repeat(auto-fit,50px);
+    grid-auto-rows: 70px;
+    margin: 0 auto;
+
+    .badge{
+        margin-bottom : 15px;
+        width:50px;
+        height:50px;
+        margin-left:0;
+        background-image:url('../images/medal.png');
+        background-repeat: no-repeat;
+        background-size: cover;
+
+        &--empty{
+          background-image:url('../images/medal-empty.png');
+        }
+    }
+
+}
+
+.feedback{
+    background-color: #e1f5c4;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.05) ,        
+        0px 5px 2px 2px rgba(0,0,0,0.1);
+    position:absolute;
+    z-index:200;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 500px;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    
+    p{
+        font-size: 2rem;
+    }
+
+    @include breakpoint(small only){
+        min-width: 300px;
+        max-width: 350px;
+    }
+}
+
+.question-set{
+    margin-top:20px; 
+}
+
+.question{
+
+    &__heading{
+        font-size : $question-text-size;
+        padding:20px;
+        text-align:center;
+
+        @include breakpoint(medium) {
+            font-size : $question-text-size + 1;
+        }
+
+    }
+
+    &__image-holder{
+        position : relative;
+    }
+
+    &__score{
+
+        .badge{
+            display:inline-block;
+            width : 50px;
+            height: 50px;
+            background-image: url(../images/medal.png);
+            background-size : 100% auto;
+
+            @include breakpoint(medium) {
+                width : 80px;
+                height: 80px;
+            }
+        }
+    }
+
+    &__image{
+        display:block;
+        height: 300px;
+        width:auto;
+        margin:40px auto;
+    }
+
+    &__option-list{
+        display: grid;
+        grid-template: 70px / 47.5% 47.5%;
+        grid-row-gap: 15px;
+        grid-auto-rows: 70px;
+        grid-column-gap: 2.5%;
+
+        @include breakpoint(small only) {
+            grid-template: 70px / repeat(auto-fill, 100%);
+        }
+    }
+
+    &__option-item{
+        width:90%;
+        max-width:300px;
+        font-size: $question-text-size;
+        display: flex;
+        align-content: center;
+        justify-content: center;
+        display:block;
+        border: 5px solid $green;
+        border-radius: 10px;
+        text-align:center;
+        text-transform:lowercase;
+        cursor:pointer;
+        transition: box-shadow 0.5s,background-color 0.5s;
+        justify-self: end;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        -ms-border-radius: 10px;
+        -o-border-radius: 10px;
+        &:nth-child(2n){
+            justify-self: start;
+
+            @include breakpoint(small only) {
+                justify-self: center;
+            }
+        }
+
+        &:hover{
+             box-shadow: 0 3px 1px 1px rgba(0,0,0,0.2);
+             background-color:$green;
+        }
+
+        @include breakpoint(medium only) {
+            width:46%;
+            max-width:none;
+            display:inline-block;
+            float:left;
+
+            &:hover{
+                animation:pulse 1s infinite;
+                box-shadow: 0 3px 1px 1px rgba(0,0,0,0.2);
+                background-color:$green;
+            }
+        }
+
+        @include breakpoint(small only) {
+            justify-self: center;
+        }
+
+    }
+    
+    &__option-item--disabled{
+        animation:none !important;
+        color: #c1b9b9;
+        cursor:default;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+}
