@@ -5,7 +5,7 @@ import Debug
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Models.Question exposing (Question)
+import Models.Question as Question exposing (Question)
 import Models.Resource exposing (Resource,ResourceType(..))
 
 main =
@@ -148,12 +148,7 @@ view model =
                     a                   
     in
         div [ class "question-set"] 
-        [ 
-            button [ onClick Msg1 ]
-            [ text "click me" ]
-            ,
-            p [] [text selected.question]
-        ]
+        [ Question.view selected Msg1 ]
 
 
 subscriptions : Model -> Sub Msg
