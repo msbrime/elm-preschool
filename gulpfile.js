@@ -1,9 +1,8 @@
 var
     gulp = require('gulp'),
     sass = require('gulp-sass'),
-    autoprefixer = require('gulp-autoprefixer'),
-    webpackStream = require('webpack-stream'),
-    webpack = require('webpack'),
+    autoprefixer = require('gulp-autoprefixer'), 
+    elm = require('gulp-elm'),
     browserSync = require('browser-sync').create(),
     plumber = require('gulp-plumber'),
     path = require('path'),
@@ -29,9 +28,9 @@ var
         watch: io.assets + "/css/**/*.*"
     },
 
-    jsPaths = {
-        input : io.app + '/index.jsx',
-        watch : [ io.app + '/**/*.js' , io.app + '/**/*.jsx'],
+    elmPaths = {
+        input : io.app + '/Main.elm',
+        watch : [ io.app + '/**/*.elm' , io.app + '/**/*.elm'],
         output : io.dest
     },
         
@@ -62,10 +61,10 @@ gulp.task("images",function(){
 });
 
 gulp.task('bundle',function () {
-    return gulp.src(jsPaths.input)
+    return gulp.src(elmPaths.input)
         .pipe(plumber())
-        .pipe(webpackStream(require('./webpack.config.js'),webpack))
-        .pipe(gulp.dest(jsPaths.output))
+        .pipe(elm.bundle('elm.js'))
+        .pipe(gulp.dest(elmPaths.output))
 });
 
 gulp.task('bundle:watch',['bundle'],function () {
@@ -89,5 +88,5 @@ gulp.task('build',['sass','images','bundle']);
 gulp.task('watch', ['build','serve'], function () {
     gulp.watch(cssPaths.watch, ['sass']);
     gulp.watch(imagePaths.watch, ['images:watch']);
-    gulp.watch(jsPaths.watch,['bundle:watch']);
+    gulp.watch(elmPaths.watch,['bundle:watch']);
 });

@@ -3,7 +3,7 @@ module Models.Question exposing (Question,view)
 import Models.Resource exposing (Resource)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class,src)
 
 type alias Question = 
     { answer: String
@@ -21,7 +21,7 @@ view question answerClickMsg  =
             text question.question
         ] 
     , div [class "question__image-holder"] [
-           img [class "question__image"] [] 
+           img [class "question__image", src question.resource.url] [] 
         ]
     , ul [class "question__option-list no-bullet clearfix"] (List.map (\x -> optionView x answerClickMsg) question.options)
     ]

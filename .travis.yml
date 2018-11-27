@@ -1,0 +1,26 @@
+language: node_js
+node_js : 
+    - "node"
+
+before_script:
+    - npm install -g elm
+    - npm install -g gulp
+
+script: gulp build
+
+before_deploy:
+    - rm .gitignore
+    - echo -e "node_modules/\nelm-stuff/\nassets/\nwebpack.config.js\npackage-lock.json\ngulpfile.js" > .gitignore
+
+deploy:
+  email: $GH_MAIL
+  name: $GH_NAME
+  provider: pages
+  skip_cleanup: true
+  github_token: $PAT
+  on:
+    branch: master
+
+branches:
+    only:
+        - master
