@@ -14,7 +14,7 @@ type alias Question =
     , resource : Resource
     }
 
-view : Question -> msg -> Html msg
+view : Question -> (String -> msg) -> Html msg
 view question answerClickMsg  = 
     div [class "question"]
     [ p [class "question__heading"] [
@@ -26,6 +26,6 @@ view question answerClickMsg  =
     , ul [class "question__option-list no-bullet clearfix"] (List.map (\x -> optionView x answerClickMsg) question.options)
     ]
 
-optionView : String -> msg -> Html msg
+optionView : String -> (String -> msg) -> Html msg
 optionView optionValue clickMsg = 
-    li [class "question__option-item", onClick clickMsg] [text optionValue]
+    li [class "question__option-item", onClick (clickMsg optionValue)] [text optionValue]

@@ -20,11 +20,14 @@ type alias Model =
     { questions : List Question
     , answered : List Int
     , current : Int
+    , attempts : Int
+    , score : Int
+    , maxScore : Int
     }
 
 
 type Msg
-    = Msg1
+    = Attempt String
     | Msg2
 
 
@@ -32,8 +35,12 @@ modelInitValue : Model
 modelInitValue = 
     { questions = initialQuestions
     , current = 1
-    , answered = [] 
+    , answered = []
+    , score = 0
+    , attempts = 0
+    , maxScore = List.sum <| List.map (\x -> (List.length x.options) - 1) initialQuestions
     }
+
 
 
 initialQuestions : List Question
@@ -113,13 +120,14 @@ initialQuestions = [
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Msg1 ->
+        Attempt answer ->
             let
                 current = model.current + 1
                 answered = model.current :: model.answered
+                _ = Debug.log "attempt" answer
             in
                 { model | current=current, answered=answered}
-        Msg2 ->
+        _ ->
             model 
             
 
@@ -148,7 +156,7 @@ view model =
                     a                   
     in
         div [ class "question-set"] 
-        [ Question.view selected Msg1 ]
+        [ Question.view selected Attempt ]
 
 
 subscriptions : Model -> Sub Msg
