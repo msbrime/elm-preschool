@@ -19,29 +19,29 @@ main =
 type alias Model =
     { questions : List Question
     , answered : List Int
-    , current : Int
+    , current : Question
     , attempts : Int
     , score : Int
     , maxScore : Int
+    , displayAnswer : Bool
     }
 
 
 type Msg
     = Attempt String
-    | Msg2
+    | NextQuestion
 
 
 modelInitValue : Model
 modelInitValue = 
     { questions = initialQuestions
-    , current = 1
+    , current = selectQuestion initialQuestions []
     , answered = []
     , score = 0
     , attempts = 0
     , maxScore = List.sum <| List.map (\x -> (List.length x.options) - 1) initialQuestions
+    , displayAnswer = False
     }
-
-
 
 initialQuestions : List Question
 initialQuestions = [
@@ -122,22 +122,25 @@ update msg model =
     case msg of
         Attempt answer ->
             let
-                current = model.current + 1
-                answered = model.current :: model.answered
+                correct = answer == model.current.answer
+                answered = model.current.id :: model.answered
                 _ = Debug.log "attempt" answer
             in
-                { model | current=current, answered=answered}
-        _ ->
-            model 
-            
+                case correct of
+                    True ->
+                        update NextQuestion {model|answered=answered}
+                    False ->
+                        {model | attempts=(model.attempts+1)}
+        NextQuestion ->
+            { model | attempts=0, current=selectQuestion model.questions model.answered }
 
 
-view : Model -> Html Msg
-view model =
+selectQuestion : List Question -> List Int -> Question
+selectQuestion questionList exclude =
     let
         selectedList =
             List.head <|
-            List.filter (\x -> not (List.member x.id model.answered)) model.questions
+            List.filter (\x -> not (List.member x.id exclude)) questionList
         selected =
             case selectedList of
                 Nothing ->
@@ -151,12 +154,18 @@ view model =
                         ,url="https://nationaldoughnutday.files.wordpress.com/2015/06/donut-number-8.png"
                         }
                     }
-
                 Just a ->
-                    a                   
+                    a  
     in
-        div [ class "question-set"] 
-        [ Question.view selected Attempt ]
+        selected
+    
+    
+
+
+view : Model -> Html Msg
+view model =
+    div [ class "question-set"] 
+    [ Question.view model.current Attempt ]
 
 
 subscriptions : Model -> Sub Msg
