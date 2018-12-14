@@ -7,12 +7,17 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Models.Question as Question exposing (Question)
 import Models.Resource exposing (Resource,ResourceType(..))
+import Ports.Main exposing (onQuestionsLoaded)
+import Json.Encode as Encode
+import Json.Decode as Decode exposing (int, string, float, nullable, Decoder)
+import Json.Decode.Pipeline as Pipeline exposing (required, optional, hardcoded)
 
 main =
-    Browser.sandbox
+    Browser.element
         { init = modelInitValue
         , view = view
         , update = update
+        , subscriptions = subscriptions
     }
 
 
@@ -30,10 +35,22 @@ type alias Model =
 type Msg
     = Attempt String
     | NextQuestion
+    | LoadQuestions Encode.Value
 
 
-modelInitValue : Model
-modelInitValue = 
+modelInitValue : String -> (Model, Cmd msg)
+modelInitValue  flags = 
+    ({ questions = []
+    , current = Question.empty
+    , answered = []
+    , score = 0
+    , attempts = 0
+    , maxScore = 0
+    , displayAnswer = False
+    }, Cmd.none)
+
+initializeModelWithQuestions : (List Question) -> Model
+initializeModelWithQuestions initialQuestions = 
     { questions = initialQuestions
     , current = selectQuestion initialQuestions []
     , answered = []
@@ -43,81 +60,8 @@ modelInitValue =
     , displayAnswer = False
     }
 
-initialQuestions : List Question
-initialQuestions = [
-    {
-        answer="apple"
-        ,explanation="This is a red apple"
-        ,id=1
-        ,options=[ "apple", "peach", "pear", "orange" ]
-        ,question="What's the name of this fruit?"
-        ,resource={
-        kind= Image
-        ,url="https://images.vexels.com/media/users/3/143051/isolated/preview/7c640e541176de78cabefc799ad3efac-apple-color-stroke-icon-by-vexels.png"
-        }
-    },{
-        answer="square"
-        ,explanation="A square is a shape with four sides of equal length"
-        ,id=2
-        ,options=[ "square", "triangle", "circle", "rectangle" ]
-        ,question="What shape is this?"
-        ,resource={ 
-            kind=Image
-            , url="https://www.colorcombos.com/images/colors/AA0114.png"
-            }
-        }, {
-        answer="number"
-        ,explanation="This is the number 3"
-        ,id=3
-        ,options=[ "letter", "number" ]
-        ,question="Is this a letter or number?"
-        ,resource={
-        kind=Image
-        ,url="http://pngimg.com/uploads/number3/number3_PNG14978.png"
-        }
-    }, {
-        answer="26"
-        ,explanation="There are 26 letters in the english alphabet"
-        ,id=4
-        ,options=[ "10", "12", "18", "26" ]
-        ,question="How many letters are in the alphabet?"
-        ,resource={
-        kind=Image
-        ,url="https://img00.deviantart.net/4ea2/i/2015/185/b/5/vintage_floral_alphabet_png_by_chaseandlinda-d8zwtsr.png"
-        }
-    },{
-        answer="triangle"
-        ,explanation="A triangle is a shape that has 3 sides"
-        ,id=5
-        ,options=[ "square", "triangle", "rectangle", "circle" ]
-        ,question="What Shape is this?"
-        ,resource={
-        kind=Image
-        ,url="http://www.pngmart.com/files/4/Triangle-PNG-Photo.png"
-        }
-    },{
-        answer="eight"
-        ,explanation="This is the number eight"
-        ,id=6
-        ,options=[ "six", "two", "eight", "nine" ]
-        ,question="What is this number called?"
-        ,resource={
-        kind=Image
-        ,url="https://nationaldoughnutday.files.wordpress.com/2015/06/donut-number-8.png"
-        }
-    },{
-        answer="chair"
-        ,explanation="Chairs are meant for sitting"
-        ,id=7
-        ,options=[ "table", "bucket", "chair", "sofa" ]
-        ,question="What is in the picture?"
-        ,resource={
-        kind=Image
-        ,url="http://vignette1.wikia.nocookie.net/inanimateinsanity/images/7/76/Chair.png/revision/latest?cb=20120116174053"
-        }
-    }]
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd msg)
 update msg model =
     case msg of
         Attempt answer ->
@@ -130,9 +74,14 @@ update msg model =
                     True ->
                         update NextQuestion {model|answered=answered}
                     False ->
-                        {model | attempts=(model.attempts+1)}
+                        ({model | attempts=(model.attempts+1)}, Cmd.none)
         NextQuestion ->
-            { model | attempts=0, current=selectQuestion model.questions model.answered }
+            ({ model | attempts=0, current=selectQuestion model.questions model.answered }, Cmd.none)
+        LoadQuestions  questions -> 
+            let
+                newModel = initializeModelWithQuestions <| parseQuestions questions
+            in
+                (newModel, Cmd.none)
 
 
 selectQuestion : List Question -> List Int -> Question
@@ -160,17 +109,18 @@ selectQuestion questionList exclude =
         selected
     
     
-
-
 view : Model -> Html Msg
 view model =
-    div [ class "question-set"] 
-    [ Question.view model.current Attempt ]
+    if (List.length model.questions) > 0 then        
+        div [ class "question-set"] 
+        [ Question.view model.current Attempt ]
+    else
+        p [] [text "Loading"]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    onQuestionsLoaded LoadQuestions
 
 
 init = 
@@ -178,3 +128,40 @@ init =
     , view=view
     , update=update   
     }
+
+
+parseQuestions : Encode.Value -> List Question
+parseQuestions encodedQuestions = 
+    let 
+        result = Decode.decodeValue questionsDecoder encodedQuestions
+        questions = 
+            case result of 
+                Ok decodedQuestions ->
+                    decodedQuestions
+                Err e->
+                    []
+    in 
+        questions
+
+
+questionsDecoder : Decoder (List Question)
+questionsDecoder = 
+    (Decode.list questionDecoder)
+
+
+questionDecoder : Decoder Question
+questionDecoder = 
+    Decode.succeed Question
+        |> required "answer" string
+        |> required "explanation" string
+        |> required "id" int
+        |> required "options" (Decode.list string)
+        |> required "question" string
+        |> required "resource" resourceDecoder
+
+
+resourceDecoder : Decoder Resource
+resourceDecoder =
+        Decode.succeed Resource
+            |> required "type" (Decode.succeed Image)
+            |> required "url" string

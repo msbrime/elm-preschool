@@ -1,4 +1,4 @@
-module Models.Question exposing (Question,view)
+module Models.Question exposing (Question,view,empty)
 
 import Models.Resource exposing (Resource)
 import Html exposing (..)
@@ -29,3 +29,6 @@ view question answerClickMsg  =
 optionView : String -> (String -> msg) -> Html msg
 optionView optionValue clickMsg = 
     li [class "question__option-item", onClick (clickMsg optionValue)] [text optionValue]
+
+empty = 
+    Question "" "" 0 [] "" Models.Resource.empty
