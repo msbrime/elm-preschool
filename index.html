@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>
+		Elm Pre-School
+	</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Mali" rel="stylesheet">
+	<link rel="stylesheet" href="build/css/main.css">
+</head>
+
+<body>
+    <div id="elm-app"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase.js"></script>
+    <script src="build/elm.js"></script>
+    <script>
+        const 
+            app = Elm.Main.init({ node: document.getElementById("elm-app") ,flags:""}),
+            config = {
+                apiKey: "AIzaSyCsqs5dFq9P8SG43p2KmSbV6__3nrRIKks",
+                authDomain: "preschool-mvc.firebaseapp.com",
+                databaseURL: "https://preschool-mvc.firebaseio.com",
+                projectId: "preschool-mvc",
+                storageBucket: "preschool-mvc.appspot.com",
+                messagingSenderId: "860559930356"
+            },
+            fb = firebase.initializeApp(config),
+            questionsRef = fb.database().ref('questions');
+        
+            questionsRef.once('value',snapshot => {
+                app.ports.onQuestionsLoaded.send(snapshot.val()) 
+            });
+    </script>
+</body>
+
+</html>
