@@ -5,12 +5,13 @@ import Debug
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Json.Encode as Encode
+import Json.Decode as Decode
 import Models.Question as Question exposing (Question)
 import Models.Resource exposing (Resource,ResourceType(..))
+import Decoders.Question exposing (questionsDecoder)
 import Ports.Main exposing (onQuestionsLoaded)
-import Json.Encode as Encode
-import Json.Decode as Decode exposing (int, string, float, nullable, Decoder)
-import Json.Decode.Pipeline as Pipeline exposing (required, optional, hardcoded)
+
 
 main =
     Browser.element
@@ -142,26 +143,3 @@ parseQuestions encodedQuestions =
                     []
     in 
         questions
-
-
-questionsDecoder : Decoder (List Question)
-questionsDecoder = 
-    (Decode.list questionDecoder)
-
-
-questionDecoder : Decoder Question
-questionDecoder = 
-    Decode.succeed Question
-        |> required "answer" string
-        |> required "explanation" string
-        |> required "id" int
-        |> required "options" (Decode.list string)
-        |> required "question" string
-        |> required "resource" resourceDecoder
-
-
-resourceDecoder : Decoder Resource
-resourceDecoder =
-        Decode.succeed Resource
-            |> required "type" (Decode.succeed Image)
-            |> required "url" string
